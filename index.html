@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        body {
+                background: url('./focal-insight-photography-EatVF2KClAU-unsplash\ \(2\).jpg') no-repeat center center fixed;
+                background-size: cover;            
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                font-family: 'Nunito', sans-serif;
+                color: white;
+                text-align: center;
+            }
+        h1 {
+            color: #e44d26;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Pacifico', cursive;
+            margin-bottom: 20px;
+        }
+        .game-container {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            max-width: 90vw;
+            width: auto;
+        }
+        .card {
+            width: 70px;
+            height: 70px; 
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 3px 3px 5px #b1b1b1, -3px -3px 5px #ffffff;
+            transform-style: preserve-3d;
+            user-select: none;
+        }
+        .card.flipped {
+            background: #ffc0cb;
+            transform: rotateY(180deg);
+        }
+        .card:hover {
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        .restart-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #e74c3c;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(231, 76, 60, 0.6);
+            transition: transform 0.2s;
+            font-family: 'Nunito', sans-serif;
+        }
+        .restart-button:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 399px) {
+            .game-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 400px) and (max-width: 699px) {
+            .game-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 700px) {
+            .game-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>✨ Memory Game ✨</h1>
+    <div class="game-container" id="gameBoard"></div>
+    <button class="restart-button" onclick="restartGame()">🔄 Restart Game</button>
+
+    <script>
+        const allEmojis = ['♥️','♦️','♣️','♠️','🃏','🎲','🈴','🎟️','🧧','🔮','🎴','🎫'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createBoard() {
+            const board = document.getElementById("gameBoard");
+            board.innerHTML = "";
+
+            let totalPairs;
+            if (window.innerWidth < 400) {
+                totalPairs = 4; 
+            } else if (window.innerWidth >= 400 && window.innerWidth < 700) {
+                totalPairs = 8;
+            } else {
+                totalPairs = 12; 
+            }
+
+            let emojis = allEmojis.slice(0, totalPairs);
+            cards = [...emojis, ...emojis]; 
+            shuffle(cards);
+
+            if (window.innerWidth < 400) {
+                board.style.gridTemplateColumns = "repeat(3, 1fr)";
+            } else if (window.innerWidth >= 400 && window.innerWidth < 700) {
+                board.style.gridTemplateColumns = "repeat(4, 1fr)";
+            } else {
+                board.style.gridTemplateColumns = "repeat(5, 1fr)";
+            }
+
+            cards.forEach((emoji, index) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.addEventListener("click", flipCard);
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains("flipped")) {
+                this.classList.add("flipped");
+                this.textContent = this.dataset.emoji;
+                flippedCards.push(this);
+                if (flippedCards.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            let [card1, card2] = flippedCards;
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                matchedPairs++;
+                flippedCards = [];
+                if (matchedPairs === cards.length / 2) {
+                    setTimeout(() => alert("🎉 You Win! 🎉"), 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove("flipped");
+                    card2.classList.remove("flipped");
+                    card1.textContent = "";
+                    card2.textContent = "";
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function restartGame() {
+            matchedPairs = 0;
+            flippedCards = [];
+            createBoard();
+        }
+
+        window.addEventListener("resize", createBoard);
+        createBoard();
+    </script>
+</body>
+</html>
+
